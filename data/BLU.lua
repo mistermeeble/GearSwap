@@ -24,6 +24,7 @@ function job_setup()
 	
 	state.LearningMode = M(false, 'Learning Mode')
 	state.AutoUnbridled = M(false, 'Auto Unbridled Learning Mode')
+	state.AutoDiffuse = M(true, 'Auto Diffusion Mode')
 	autows = 'Chant Du Cygne'
 	autofood = 'Soy Ramen'
 	
@@ -179,6 +180,8 @@ function job_setup()
         'Pyric Bulwark','Tearing Gust','Thunderbolt','Tourbillion','Uproot'
     }
 
+    auto_diffuse = S{'Carcharian Verve','Mighty Guard'}
+
 	update_melee_groups()
 	init_job_states({"Capacity","AutoRuneMode","AutoTrustMode","AutoWSMode","AutoShadowMode","AutoFoodMode","AutoNukeMode","AutoStunMode","AutoDefenseMode","AutoBuffMode",},{"AutoSambaMode","Weapons","OffenseMode","WeaponskillMode","IdleMode","Passive","RuneElement","LearningMode","CastingMode","TreasureMode"})
 end
@@ -232,7 +235,12 @@ function job_filter_precast(spell, spellMap, eventArgs)
 		if (state.AutoUnbridled.value or buffup ~= '' or state.AutoBuffMode.value) and (windower.ffxi.get_ability_recasts()[81] < latency and (windower.ffxi.get_spell_recasts()[spell.recast_id]/60) < spell_latency) then
 			eventArgs.cancel = true
 			windower.chat.input('/ja "Unbridled Learning" <me>')
-			windower.chat.input:schedule(1,'/ma "'..spell.english..'" '..spell.target.raw..'')
+			if (state.AutoDiffuse.value and windower.ffxi.get_ability_recasts()[184] < latency) then
+				windower.chat.input:schedule(1,'/ja "Diffusion" <me>')
+				windower.chat.input:schedule(3,'/ma "'..spell.english..'" '..spell.target.raw..'')
+			else
+				windower.chat.input:schedule(1,'/ma "'..spell.english..'" '..spell.target.raw..'')
+			end
 			return
 		else
 			eventArgs.cancel = true
